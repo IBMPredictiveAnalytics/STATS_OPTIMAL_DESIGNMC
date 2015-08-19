@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
+
+<title>STATS OPTIMAL DESIGNMC Extension Command</title>
+
+<link rel="stylesheet" type="text/css" href="extsyntax.css" />
+
+</head>
+
+<body>
+<h1>STATS OPTIMAL DESIGNMC Extension Command</h1>
+
+<p>Create an optimal experimental design dataset by a Monte Carlo method</p>
+<div class="syntax">
+<p>STATS OPTIMAL DESIGNMC  VARNAMES=<em>list of names for design variables</em><sup>&#42;</sup></br>
+LOWS=<em>variable minimum values</em><sup>&#42;</sup></br>
+HIGHS=<em>variable maximum values</em><sup>&#42;</sup></br>
+CENTERS=<em>variable centering values</em><sup>&#42;</sup></br>
+ROUNDTOS=<em>numbers of decimals to round variable values to</em><sup>&#42;</sup></br>
+LEVELS=<em>variable numbers of levels</em><sup>&#42;</sup></br>
+FACTORS=NO<sup>&#42;&#42;</sup> or YES<sup>&#42;</sup></br>
+MIXTURES=NO<sup>&#42;&#42;</sup> or YES<sup>&#42;</sup></br>
+MODEL=LINEAR<sup>&#42;&#42;</sup> or QUAD or CUBIC or CUBICS<sup>&#42;</sup></br>
+FORMULA=<em>"R model formula"</em></br>
+CONSTANT=YES<sup>&#42;&#42;</sup> or NO</br>
+TRIALS=<em>number of trials</em></br>
+MIXTURESUM=<em>mixture sum</em></br>
+CONSTRAINTFUNC=<em>"file containing function for trimming design region"</em></br>
+
+
+<p>/OPTIONS CRITERION=D<sup>&#42;&#42;</sup> or A </br>
+CENTER=NO<sup>&#42;&#42;</sup> or YES</br>
+DESIGNALG=EXACT<sup>&#42;&#42;</sup> or APPROX</br>
+INITIAL=<em>RANDOM</em><sup>&#42;&#42;</sup> or NULLIFICATION</br>
+REPEATS=<em>number of repeats of design generation</em></br>
+NUMCAND=<em>number of candidate points to generate</em></br>
+</p>
+
+<p>/OUTPUT CONFOUNDING=YES<sup>&#42;&#42;</sup> or NO</br>
+</p>
+<p>/SAVE DATASET=<em>dataset name</em><sup>&#42;</sup></br>
+</p>
+
+<p>/HELP</p>
+
+
+
+<p><sup>&#42;</sup> Required<br/>
+<sup>&#42;&#42;</sup> Default</p>
+</div>
+<p>STATS OPTIMAL DESIGNMC /HELP prints this information and does nothing else.</p>
+
+<pre class="example"><code>STATS OPTIMAL DESIGNMC 
+VARNAMES=v1 v2 LOWS=-100 -50 HIGHS=100 50 CENTERS=0 1
+LEVELS=5 4 ROUNDTOS=0 0 FACTORS=YES NO MIXTURES=NO 
+MODEL=QUAD CONSTANT=YES 
+/OPTIONS CRITERION=D CENTER=NO INITIAL=RANDOM REPEATS=5 
+/OUTPUT CONFOUNDING=YES
+/SAVE DATASET=output.
+</code></pre>
+
+<p><strong>VARNAMES</strong> lists two or more variable names for the design variables.
+</p>
+
+<p>For each variable name, the following properties must be specified.  There must be as
+many values as there are variable names, except that a single value can be specified to
+apply to all of the variables.  The first four properties do not actually
+apply to factors, but a value must be specified anyway if both factors and
+nonfactors are included in the design in order to keep the properties aligned by variable.  Similarly, see below for the treatment of mixture variables.
+<ul>
+<li><strong>LOWS</strong> minimum values</li>
+<li><strong>HIGHS</strong> maximum values</li>
+<li><strong>CENTERS</strong> centering values</li>
+<li><strong>ROUNDTOS</strong> number of digits following the decimal.  E.g.,
+a value of 2 means values are rounded to two decimal places</li>
+<li><strong>LEVELS</strong> number of levels</li>
+<li><strong>FACTORS</strong> YES or NO indicating whether the variables are factors</li>
+<li><strong>MIXTURES</strong> YES or NO indicating whether the variables are mixtures.
+If any variable is a mixture, the constant term is suppressed.</li>
+</ul>
+<p>The generation algorithm samples from randomly chosen values in the 
+specified ranges, except
+that mixture variables are always sampled between zero and one.  The
+sampled values are rounded according to the ROUNDTOS specifications, or, for mixtures,
+according to the maximum in ROUNDTOS.  If both FACTORS and MIXTURES are
+yes for a variable, it is treated as a mixture.</p>
+
+<p><strong>MODEL</strong> specifies what type of model the design is for.  It can be
+linear, quadratic, cubic or cubics in the nonfactor variables.  Factor variables are 
+added linearly.  cubics produces a nonsingular version of a cubic model when the
+variables are mixtures, i.e., they sum to a constant.  
+Either this keyword or <strong>FORMULA</strong> must be specified but not both.
+</p>
+
+<p><strong>FORMULA</strong> is a more flexible way to specify a model.  A model
+expression starting with ~ written as an R formula can be given in quotes.  The
+operators +, *, and : can be used for linear, interaction, and nested terms.
+See the R documentation for Model Formulae for details.  The variable names
+in the formula must match the names in the VARNAMES list.</p>
+<pre class="example"><code>
+~x1 + x2 + x1 * x2
+</code></pre>
+
+<p><strong>CONSTANT</strong> specifies whether to include a constant term.  For
+mixtures, the constant is automatically suppressed.</p>
+<p><strong>TRIALS</strong> specifies the number of trials in the design.
+If it is not specified, it is set to the number of terms in the model
+expression plus five.  It must be greater than the number of terms
+and no more than the number of candidate points.</p>
+<p><strong>NUMCAND</strong> specifies the number of candidate points
+to generate.  It defaults to ten times the number of terms in the model.</p>
+<p><strong>CONSTRAINTFUNC</strong> By default, all points within the
+univariately specified ranges are valid candidates.  A filter function
+can be specified to specify cross-variable restrictions.  The CONSTRAINTFUNC
+argument specifies a file containing an R function definition that returns
+TRUE or FALSE according as whether the candidate point is valid.  The function
+argument is a list of the candidate point coordinates.  The function name
+must be <em>dfilter</em>.  Here is an example function.
+<pre class="example"><code>
+# constraint function
+
+dfilter = function(x) {
+    if (sum(x) <= .75) {
+        return(TRUE)
+    } else {
+        return(FALSE)
+    }
+}
+</code></pre>
+It returns TRUE if the sum of the coordinates is less than or equal to .75.</p>
+
+
+
+<p><strong>MIXTURESUM</strong> specifies the sum for the mixture variables
+and defaults to one.</p>
+
+<h2>OPTIONS</h2>
+
+<p><strong>CRITERION</strong> specifies the design criterion: D or A.  D is
+a scaling of the generalized variance of the design matrix. A is proportional
+to the average variance of the parameter estimates.</p>
+
+<p><strong>CENTER</strong> determines whether when a design is evaluated the
+non-factor variables are centered first.</p>
+
+<p><strong>DESIGNALG</strong> if EXACT causes an exact design to be
+calculated.  If APPROX, an approximate theory design is calculated.</p>
+
+<p><strong>INITIAL</strong> specifies whether the starting design
+is chosen at random or by nullification, which is slower.
+Nullification successively adds points to a design until the required number of 
+candidate points are found. Each new point is selected from a new sampling of the 
+putative candidate points. In general, 
+this will produce better designs that those from a random start.</p>
+
+<p><strong>REPEATS</strong> specifies how many times the entire process
+is repeated with the best returned as the final design.  More repeats will
+often produce a better design.  The default value is 5.</p>
+
+<p><strong>NUMCAND</strong> determines the number of candidate points
+to generate.  The default is ten times the number of terms in the
+design formula.  The number of trials, if specified, must be
+less than or equal to the number of candidate points.</p>
+
+<h2>OUTPUT</h2>
+<p>CONFOUNDING</p> specifies whether a confounding table is displayed.
+The columns of the table contain the regression coefficients of
+each variable on all the others.</p>
+
+<h2>SAVE</h2>
+<p><strong>DATASET</strong> gives the name for the dataset holding
+the output design.  The dataset name must not already be in use.</p>
+
+<h3>An Operational Note</h3>
+<p>If there is only one design variable, it will always be
+named X1, and some numbers in the design evaluation table will
+be missing.</p>
+
+<h3>Acknowledgements</h3>
+<p>This procedure uses the AlgDesign package by Bob Wheeler.  Documentation
+for formulas can be found in the help for that procedure, including the vignette,
+Comments on Optimal Design.</p>
+Wheeler, R.E. (2004). optMonteCarlo. AlgDesign. The R project for statistical computing http://www.r-project.org/
+
+<p>&copy; Copyright IBM Corp. 1989, 2015</p>
+
+</body>
+
+</html>
+
