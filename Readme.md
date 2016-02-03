@@ -1,11 +1,11 @@
 # STATS OPTIMAL DESIGNMC
 ## Generate an optimal design
- This procedure generates an optimal experimental design d
+ This procedure generates an optimal experimental design dataset using Monte Carlo methods and the Federov algorithm.
 
 ---
 Requirements
 ----
-- IBM SPSS Statistics 18 or later
+- IBM SPSS Statistics 18 or later and the corresponding IBM SPSS Statistics-Integration Plug-in for R.
 
 ---
 Installation intructions
