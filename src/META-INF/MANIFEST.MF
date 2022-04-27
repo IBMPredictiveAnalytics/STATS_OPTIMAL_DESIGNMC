@@ -7,7 +7,7 @@ Summary: Generate an optimal design
 Description: This procedure generates an optimal experimental design d
  ataset using Monte Carlo methods and the Federov algorithm.
 Author: JKP, IBM SPSS
-Version: 1.0.0
+Version: 1.0.1
 Product-Version: 18
 Date: 04-feb-2015
 Categories: experimental design
