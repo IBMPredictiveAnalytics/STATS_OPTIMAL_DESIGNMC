@@ -1,4 +1,5 @@
 Name: STATS OPTIMAL DESIGNMC
+Display-Name: Generate Optimal Experimental Design
 Dialog-Specs: STATS_OPTIMAL_DESIGNMC.spd
 Command-Specs: STATS_OPTIMAL_DESIGNMC.xml
 Code-Files: STATS_OPTIMAL_DESIGNMC.R
@@ -7,7 +8,7 @@ Summary: Generate an optimal design
 Description: This procedure generates an optimal experimental design d
  ataset using Monte Carlo methods and the Federov algorithm.
 Author: JKP, IBM SPSS
-Version: 1.0.1
+Version: 1.0.0
 Product-Version: 18
 Date: 04-feb-2015
 Categories: experimental design
